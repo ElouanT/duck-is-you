@@ -4,15 +4,15 @@ import com.almasb.fxgl.app.GameSettings
 import com.almasb.fxgl.dsl.FXGL
 import com.almasb.fxgl.dsl.FXGL.Companion.onKeyDown
 import com.almasb.fxgl.dsl.getGameScene
-import com.almasb.fxgl.entity.Entity
 import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
 
 const val mapWidth : Int = 14
 const val mapHeight : Int = 10
 var scaleFactor : Double = 1.0
-lateinit var levels : Array<Level>
+var levels : ArrayList<IBuilderLevel> = ArrayList()
 lateinit var currentLevel : Level
+var levelIndex = 0
 
 class GameApp : GameApplication() {
 
@@ -46,48 +46,89 @@ class GameApp : GameApplication() {
     }
 
     override fun initInput() {
-        var map = currentLevel.map
         onKeyDown(KeyCode.RIGHT) {
-            var movableObjects = map.cases.filter { obj -> obj != null && obj.behavior == Behavior.MOVE }
+            var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE }
             for (obj in movableObjects) {
-                map.moveRight(obj!!)
+                currentLevel.map.moveRight(obj!!)
             }
         }
         onKeyDown(KeyCode.LEFT) {
-            var movableObjects = map.cases.filter { obj -> obj != null && obj.behavior == Behavior.MOVE}
+            var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE}
             for (obj in movableObjects) {
-                map.moveLeft(obj!!)
+                currentLevel.map.moveLeft(obj!!)
             }
         }
         onKeyDown(KeyCode.UP) {
-            var movableObjects = map.cases.filter { obj -> obj != null && obj.behavior == Behavior.MOVE }
+            var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE }
             for (obj in movableObjects) {
-                map.moveUp(obj!!)
+                currentLevel.map.moveUp(obj!!)
             }
         }
         onKeyDown(KeyCode.DOWN) {
-            var movableObjects = map.cases.filter { obj -> obj != null && obj.behavior == Behavior.MOVE }
+            var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE }
             for (obj in movableObjects) {
-                map.moveDown(obj!!)
+                currentLevel.map.moveDown(obj!!)
             }
         }
         onKeyDown(KeyCode.R) {
-            currentLevel.reset()
+            reset()
         }
     }
 }
 
-fun  main(args: Array<String>) {
-    // initialize game
-    var map = Map(mapWidth, mapHeight, scaleFactor)
-    map.setGameObject(Sprite("sprite_duck.png", Behavior.MOVE), 0, 1)
-    map.setGameObject(Sprite("sprite_wall.png", Behavior.STOP), 1, 0)
-    map.setGameObject(Sprite("sprite_wall.png", Behavior.STOP), 1, 1)
-    map.setGameObject(Sprite("sprite_wall.png", Behavior.STOP), 2, 1)
-    map.setGameObject(Sprite("sprite_rock.png", Behavior.PUSH), 4, 4)
-    currentLevel = Level(0, map)
+fun reset(){
+    currentLevel.reset()
+}
+fun nextLevel(){
+    var map = currentLevel.map
+    // Retrait de toutes les entités du niveau actuel
+    for (obj in map.cases) {
+        if (obj != null) {
+            obj.gameEntity.removeFromWorld()
+        }
+    }
+    var i = 0
 
-    // lauch game
+    // Passage au niveau suivant
+    levelIndex++
+    var nextLevel = buildLevel(levels.get(levelIndex))
+
+    // Placement des nouveaux GameObject sur la map
+    for (obj in nextLevel.map.cases) {
+        var y = i/mapWidth
+        var x = i%mapWidth
+        if (obj != null) {
+            obj.gameEntity = FXGL.entityBuilder()
+                .at(x * 48.0 * scaleFactor, y * 48.0 * scaleFactor)
+                .view(obj.image)
+                .scale(scaleFactor, scaleFactor)
+                .buildAndAttach();
+        }
+        i++
+    }
+
+    // Reactualise
+    currentLevel = nextLevel
+    currentLevel.reset()
+}
+
+fun buildLevel(levelBuilder: IBuilderLevel): Level {
+    levelBuilder.buildDuck()
+    levelBuilder.buildFlag()
+    levelBuilder.buildSprites()
+    levelBuilder.buildBlocks()
+    return levelBuilder.getLevel()
+}
+
+fun  main(args: Array<String>) {
+    // Initialisation
+    // Ajout des niveaux
+    levels.add(BuilderDemoLevel())
+    levels.add(BuilderFinalLevel())
+    // Construction du niveau
+    currentLevel = buildLevel(levels.get(levelIndex))
+
+    // Lancement du jeu
     launch(GameApp::class.java,args)
 }
 

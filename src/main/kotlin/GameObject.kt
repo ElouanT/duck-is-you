@@ -1,7 +1,7 @@
 import com.almasb.fxgl.entity.Entity
 
-abstract class GameObject(img: String, behavior: Behavior) {
+abstract class GameObject(img: String, behavior: EBehavior) {
     var image : String = img
-    lateinit var gameEntity: Entity // Fxgl entity to display and move the image on screen
-    var behavior: Behavior = behavior
+    lateinit var gameEntity: Entity // Entité FXGL pour afficher l'image à l'écran
+    open var behavior: EBehavior = behavior
 }

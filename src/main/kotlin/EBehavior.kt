@@ -1,3 +1,3 @@
-enum class Behavior {
+enum class EBehavior {
     MOVE, PUSH, STOP, DEFEAT, WIN
 }

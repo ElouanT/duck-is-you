@@ -1,3 +1,3 @@
 
-rootProject.name = "pattern"
+rootProject.name = "DuckIsYou"
 
