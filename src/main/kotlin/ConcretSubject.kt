@@ -1,3 +1,5 @@
+import enums.EBehavior
+
 class ConcretSubject(): ISubject {
     var observers: ArrayList<IObserver> = ArrayList()
     var behavior: EBehavior = EBehavior.STOP

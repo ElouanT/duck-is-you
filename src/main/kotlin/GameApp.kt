@@ -6,6 +6,8 @@ import com.almasb.fxgl.dsl.FXGL.Companion.onKeyDown
 import com.almasb.fxgl.dsl.getGameScene
 import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
+import builder.*
+import enums.EBehavior
 
 const val mapWidth : Int = 14
 const val mapHeight : Int = 10

@@ -1,3 +1,7 @@
+package builder
+
+import Level
+
 interface IBuilderLevel {
 
     fun buildDuck()

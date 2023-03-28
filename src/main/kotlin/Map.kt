@@ -1,3 +1,7 @@
+import enums.EBehavior
+import enums.EBlock
+import enums.ESprite
+
 class Map() {
     var width = 0
     var height = 0
@@ -223,10 +227,14 @@ class Map() {
                     if (downCase.type == EBlock.ACTION) blockAction = downCase
                 }
             }
-
-            if (blockSubject != null && blockAction != null) {
+            
+            if (blockSubject != null) {
                 var subject = subjects[blockSubject.spriteType!!]!!
-                subject.behavior = blockAction.behaviorType!!
+                if (blockAction != null) {
+                    subject.behavior = blockAction.behaviorType!!
+                } else {
+                    subject.behavior = EBehavior.STOP
+                }
                 subject.notifyObservers()
             }
         }
