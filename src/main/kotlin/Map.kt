@@ -251,5 +251,6 @@ class Map() {
             }
             i++
         }
+        checkForBehaviorChange()
     }
 }
