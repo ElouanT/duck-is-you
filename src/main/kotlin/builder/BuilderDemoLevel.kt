@@ -3,7 +3,7 @@ package builder
 import enums.*
 import Level
 import Map
-import Sprite
+import observer.Sprite
 import Block
 import mapHeight
 import mapWidth

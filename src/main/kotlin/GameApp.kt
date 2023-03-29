@@ -8,6 +8,7 @@ import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
 import builder.*
 import enums.EBehavior
+import enums.EDirection
 
 const val mapWidth : Int = 14
 const val mapHeight : Int = 10
@@ -48,29 +49,33 @@ class GameApp : GameApplication() {
     }
 
     override fun initInput() {
-        onKeyDown(KeyCode.RIGHT) {
-            var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE }
-            for (obj in movableObjects) {
-                currentLevel.map.moveRight(obj!!)
-            }
-        }
-        onKeyDown(KeyCode.LEFT) {
-            var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE}
-            for (obj in movableObjects) {
-                currentLevel.map.moveLeft(obj!!)
-            }
-        }
         onKeyDown(KeyCode.UP) {
             var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE }
             for (obj in movableObjects) {
-                currentLevel.map.moveUp(obj!!)
+                currentLevel.map.move(obj!!, EDirection.UP)
             }
+            currentLevel.map.checkForBehaviorChange()
         }
         onKeyDown(KeyCode.DOWN) {
             var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE }
             for (obj in movableObjects) {
-                currentLevel.map.moveDown(obj!!)
+                currentLevel.map.move(obj!!, EDirection.DOWN)
             }
+            currentLevel.map.checkForBehaviorChange()
+        }
+        onKeyDown(KeyCode.LEFT) {
+            var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE}
+            for (obj in movableObjects) {
+                currentLevel.map.move(obj!!, EDirection.LEFT)
+            }
+            currentLevel.map.checkForBehaviorChange()
+        }
+        onKeyDown(KeyCode.RIGHT) {
+            var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE }
+            for (obj in movableObjects) {
+                currentLevel.map.move(obj!!, EDirection.RIGHT)
+            }
+            currentLevel.map.checkForBehaviorChange()
         }
         onKeyDown(KeyCode.R) {
             reset()

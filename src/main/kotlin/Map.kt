@@ -1,27 +1,23 @@
 import enums.EBehavior
 import enums.EBlock
+import enums.EDirection
 import enums.ESprite
+import observer.ConcretSubject
+import observer.Sprite
 
-class Map() {
-    var width = 0
-    var height = 0
-    var scaleFactor = 0.0
-    lateinit var defaultCases : Array<GameObject?> // Emplacement par défaut utilisé pour le reset
-    lateinit var cases : Array<GameObject?>
-
-    var blockIs: ArrayList<GameObject> = ArrayList()  // IS Blocks
-
-    var subjects: HashMap<ESprite, ConcretSubject> = HashMap() // Subjects for observers (one for each type of sprite)
-
-    constructor(width: Int, height: Int, scaleFactor: Double) : this() {
-        this.width = width
-        this.height = height
-        this.scaleFactor = scaleFactor
-        defaultCases = Array(width*height){null}
-        cases = Array(width*height){null}
-
+class Map(
+    var width: Int = 0,
+    var height: Int = 0,
+    var scaleFactor: Double = 0.0, // Redimension des sprites
+    var defaultCases: Array<GameObject?> = Array(width * height) { null }, // Emplacement initial des cases utilisé par le reset
+    var cases: Array<GameObject?> = Array(width * height) { null },
+    var blockIs: ArrayList<GameObject> = ArrayList(), // Liste des blocks IS pour vérifier les mises à jour de comportement
+    var subjects: HashMap<ESprite, ConcretSubject> = HashMap() // Sujets des observers
+) {
+    init {
+        // Initialisation des observers pour chaque type de sprites
         for (spriteType in ESprite.values()) {
-            subjects.set(spriteType, ConcretSubject())
+            subjects[spriteType] = ConcretSubject()
         }
     }
 
@@ -35,160 +31,76 @@ class Map() {
 
         // Emplacement sur la map
         if (x<=width && y<=height) {
-            cases[y*width + x] = obj
             defaultCases[y*width + x] = obj
+            cases[y*width + x] = obj
         }
     }
 
-    fun moveLeft(obj: GameObject) : Boolean {
+    fun move(obj: GameObject, direction: EDirection) : Boolean {
         var i = cases.indexOf(obj)
-        if (i%width == 0) { // Si l'obj se situe sur la première colonne
-            return false
-        }
-        else if (cases[i-1] != null) { // Si la case de gauche est occupée
-            when (cases[i-1]!!.behavior) {
-                EBehavior.MOVE, EBehavior.PUSH -> {
-                    if (!moveLeft(cases[i-1]!!)) { // On pousse la case de gauche
-                        return false // Sinon
-                    }
-                }
-                EBehavior.STOP -> {
-                    return false
-                }
-                EBehavior.DEFEAT -> {
-                    if(cases[i]!!.behavior == EBehavior.MOVE) {
-                        reset()
-                    }
-                    return false
-                }
-                EBehavior.WIN -> {
-                    if(cases[i]!!.behavior == EBehavior.MOVE) {
-                        nextLevel()
-                    }
-                    return false
-                }
-            }
-        }
-        // Déplacement
-        cases[i-1] = obj
-        cases[i] = null
-        if (obj.behavior == EBehavior.MOVE) checkForBehaviorChange()
-        // Affichage
-        obj.gameEntity.translateX(-48.0*scaleFactor)
-        return true
-    }
 
-    fun moveRight(obj: GameObject) : Boolean {
-        var i = cases.indexOf(obj)
-        if (i%width == width-1) { // Si l'obj se situe sur la dernière colonne
-            return false
-        }
-        else if (cases[i+1] != null) { // Si la case de droite est occupée
-            when (cases[i+1]!!.behavior) {
-                EBehavior.MOVE, EBehavior.PUSH -> {
-                    if (!moveRight(cases[i + 1]!!)) { // On pousse la case de droite
-                        return false // Sinon
-                    }
-                }
-                EBehavior.STOP -> {
-                    return false
-                }
-                EBehavior.DEFEAT -> {
-                    if(cases[i]!!.behavior == EBehavior.MOVE) {
-                        reset()
-                    }
-                    return false
-                }
-                EBehavior.WIN -> {
-                    if(cases[i]!!.behavior == EBehavior.MOVE) {
-                        nextLevel()
-                    }
-                    return false
-                }
-            }
-        }
-        // Déplacement
-        cases[i+1] = obj
-        cases[i] = null
-        if (obj.behavior == EBehavior.MOVE) checkForBehaviorChange()
-        // Affichage
-        obj.gameEntity.translateX(48.0*scaleFactor)
-        return true
-    }
+        // Code dépendant de la direction
+        var adjacentCaseIndex: Int
 
-    fun moveUp(obj: GameObject) : Boolean {
-        var i = cases.indexOf(obj)
-        if (i < width) { // Si l'obj se situe sur la première ligne
-            return false
-        }
-        else if (cases[i-width] != null) { // Si la case du dessus est occupée
-            when (cases[i-width]!!.behavior) {
-                EBehavior.MOVE, EBehavior.PUSH -> {
-                    if (!moveUp(cases[i - width]!!)) { // On pousse la case du dessus
-                        return false // Sinon
-                    }
-                }
-                EBehavior.STOP -> {
-                    return false
-                }
-                EBehavior.DEFEAT -> {
-                    if(cases[i]!!.behavior == EBehavior.MOVE) {
-                        reset()
-                    }
-                    return false
-                }
-                EBehavior.WIN -> {
-                    if(cases[i]!!.behavior == EBehavior.MOVE) {
-                        nextLevel()
-                    }
-                    return false
-                }
+        when (direction) {
+            EDirection.UP -> {
+                if (i < width) return false // Si l'objet est sur la première ligne
+                adjacentCaseIndex = i-width
+            }
+            EDirection.DOWN -> {
+                if (i >= width*(height-1)) return false // Si l'objet est sur la dernière ligne
+                adjacentCaseIndex = i+width
+            }
+            EDirection.LEFT -> {
+                if (i%width == 0) return false // Si l'objet est sur la première colonne
+                adjacentCaseIndex = i-1
+            }
+            EDirection.RIGHT -> {
+                if (i%width == width-1) return false // Si l'objet est sur la dernière colonne
+                adjacentCaseIndex = i+1
             }
         }
-        // Déplacement
-        cases[i-width] = obj
-        cases[i] = null
-        if (obj.behavior == EBehavior.MOVE) checkForBehaviorChange()
-        // Affichage
-        obj.gameEntity.translateY(-48.0*scaleFactor)
-        return true
-    }
 
-    fun moveDown(obj: GameObject) : Boolean {
-        var i = cases.indexOf(obj)
-        if (i >= width*(height-1)) { // Si l'obj se situe sur la dernière ligne
-            return false
-        }
-        else if (cases[i+width] != null) { // Si la case du dessous est occupée
-            when (cases[i+width]!!.behavior) {
+        // Code commun
+        if (cases[adjacentCaseIndex] != null) { // Si la case de destination est occupée
+            var adjacentCase : GameObject = cases[adjacentCaseIndex]!!
+            when (adjacentCase.behavior) {
                 EBehavior.MOVE, EBehavior.PUSH -> {
-                    if (!moveDown(cases[i + width]!!)) { // On pousse la case du dessous
-                        return false // Sinon
+                    if (!move(adjacentCase, direction)) { // On pousse la case adjacente
+                        return false // Si ce n'est pas possible pas de déplacement
                     }
-                }
-                EBehavior.STOP -> {
-                    return false
                 }
                 EBehavior.DEFEAT -> {
-                    if(cases[i]!!.behavior == EBehavior.MOVE) {
-                        reset()
-                    }
+                    if(obj!!.behavior == EBehavior.MOVE) reset()
                     return false
                 }
                 EBehavior.WIN -> {
-                    if(cases[i]!!.behavior == EBehavior.MOVE) {
-                        nextLevel()
-                    }
+                    if(obj!!.behavior == EBehavior.MOVE) nextLevel()
                     return false
                 }
+                EBehavior.STOP -> return false
             }
         }
+
         // Déplacement
-        cases[i+width] = obj
+        cases[adjacentCaseIndex] = obj
         cases[i] = null
-        if (obj.behavior == EBehavior.MOVE) checkForBehaviorChange()
+
         // Affichage
-        obj.gameEntity.translateY(48.0*scaleFactor)
+        when (direction) {
+            EDirection.UP -> {
+                obj.gameEntity.translateY(-48.0*scaleFactor)
+            }
+            EDirection.DOWN -> {
+                obj.gameEntity.translateY(48.0*scaleFactor)
+            }
+            EDirection.LEFT -> {
+                obj.gameEntity.translateX(-48.0*scaleFactor)
+            }
+            EDirection.RIGHT -> {
+                obj.gameEntity.translateX(48.0*scaleFactor)
+            }
+        }
         return true
     }
 

@@ -1,3 +1,6 @@
+package observer
+
+import GameObject
 import enums.EBehavior
 import enums.ESprite
 

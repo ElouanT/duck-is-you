@@ -1,3 +1,5 @@
+package observer
+
 import enums.EBehavior
 
 class ConcretSubject(): ISubject {
