@@ -10,6 +10,7 @@ import scaleFactor
 
 class BuilderFinalLevel: IBuilderLevel {
     var number = 1
+    var backgroundColor = "#170D0C"
     var map = Map(mapWidth, mapHeight, scaleFactor)
     var duckCoordinate = Pair(mapWidth /2, mapHeight /2)
     override fun buildDuck() {
@@ -28,6 +29,10 @@ class BuilderFinalLevel: IBuilderLevel {
 
     }
     override fun getLevel(): Level {
-        return Level(number, map)
+        buildDuck()
+        buildFlag()
+        buildSprites()
+        buildBlocks()
+        return Level(number, backgroundColor, map)
     }
 }

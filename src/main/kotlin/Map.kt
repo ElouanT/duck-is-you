@@ -9,11 +9,12 @@ class Map(
     var width: Int = 0,
     var height: Int = 0,
     var scaleFactor: Double = 0.0, // Redimension des sprites
-    var defaultCases: Array<GameObject?> = Array(width * height) { null }, // Emplacement initial des cases utilisé par le reset
-    var cases: Array<GameObject?> = Array(width * height) { null },
-    var blockIs: ArrayList<GameObject> = ArrayList(), // Liste des blocks IS pour vérifier les mises à jour de comportement
-    var subjects: HashMap<ESprite, ConcretSubject> = HashMap() // Sujets des observers
 ) {
+    var defaultCases: Array<GameObject?> = Array(width * height) { null } // Emplacement initial des cases utilisé par le reset
+    var cases: Array<GameObject?> = Array(width * height) { null }
+    var subjects: HashMap<ESprite, ConcretSubject> = HashMap() // Sujets des observers mettant à jour les comportements
+    var blocks: ArrayList<Block> = ArrayList() // Liste des blocks pour vérifier les mises à jour de comportements
+
     init {
         // Initialisation des observers pour chaque type de sprites
         for (spriteType in ESprite.values()) {
@@ -24,9 +25,9 @@ class Map(
     fun setGameObject(obj: GameObject, x: Int, y: Int) {
         // Ajout aux listes pour futur traitement
         if (obj is Sprite) {
-            subjects.get(obj.type)!!.addObserver(obj)
-        } else if (obj is Block && obj.type == EBlock.IS) {
-            blockIs.add(obj)
+            subjects.get(obj.type)!!.addObserver(obj) // Abonnement des sprites au listener associé à leur type
+        } else if (obj is Block) {
+            blocks.add(obj)
         }
 
         // Emplacement sur la map
@@ -104,51 +105,44 @@ class Map(
         return true
     }
 
-    fun checkForBehaviorChange() { // /!\ Ne prends pas en compte de multiples block pour un même "IS" /!\
-        for (b in blockIs) {
-            var i = cases.indexOf(b)
+    fun getAdjacentGameObject(gameObject: GameObject): ArrayList<GameObject> {
+        var i = cases.indexOf(gameObject)
+        var adjacentCases = ArrayList<GameObject>()
 
-            var blockSubject: Block? = null
-            var blockAction: Block? = null
+        if (i >= width && cases[i-width] != null) adjacentCases.add(cases[i-width]!!) // Haut
+        if (i < width*(height-1) && cases[i+width] != null) adjacentCases.add(cases[i+width]!!) // Bas
+        if (i%width != 0 && cases[i-1] != null) adjacentCases.add(cases[i-1]!!)  // Gauche
+        if (i%width != width-1 && cases[i+1] != null) adjacentCases.add(cases[i+1]!!) // Droite
 
-            if (i%width != 0) { // !première colonne
-                var leftCase = cases[i-1]
-                if (leftCase != null && leftCase is Block) {
-                    if (leftCase.type == EBlock.SUBJECT) blockSubject = leftCase
-                    if (leftCase.type == EBlock.ACTION) blockAction = leftCase
+        return adjacentCases
+    }
+
+    fun checkForBehaviorChange() {
+        var activeBlocks: ArrayList<Block> = ArrayList()
+
+        for (blockSubject in blocks.filterIsInstance<BlockSubject>()) {
+            var subject = subjects[blockSubject.type]!!
+            subject.behavior = EBehavior.STOP
+
+            for (blockIs in getAdjacentGameObject(blockSubject).filterIsInstance<BlockIs>()) {
+                for (blockAction in getAdjacentGameObject(blockIs).filterIsInstance<BlockAction>()) {
+                    // Enregistrement du triplet de blocks actifs
+                    activeBlocks.add(blockSubject)
+                    activeBlocks.add(blockIs)
+                    activeBlocks.add(blockAction)
+
+                    // Mise à jour du comportement des sprites
+                    subject.behavior = blockAction.type
                 }
             }
-            if (i%width != width-1) { // !dernière colonne
-                var rightCase = cases[i+1]
-                if (rightCase != null && rightCase is Block) {
-                    if (rightCase.type == EBlock.SUBJECT) blockSubject = rightCase
-                    if (rightCase.type == EBlock.ACTION) blockAction = rightCase
-                }
-            }
-            if (i >= width) { // !première ligne
-                var upCase = cases[i-width]
-                if (upCase != null && upCase is Block) {
-                    if (upCase.type == EBlock.SUBJECT) blockSubject = upCase
-                    if (upCase.type == EBlock.ACTION) blockAction = upCase
-                }
-            }
-            if (i < width*(height-1)) { // !dernière ligne
-                var downCase = cases[i+width]
-                if (downCase != null && downCase is Block) {
-                    if (downCase.type == EBlock.SUBJECT) blockSubject = downCase
-                    if (downCase.type == EBlock.ACTION) blockAction = downCase
-                }
-            }
-            
-            if (blockSubject != null) {
-                var subject = subjects[blockSubject.spriteType!!]!!
-                if (blockAction != null) {
-                    subject.behavior = blockAction.behaviorType!!
-                } else {
-                    subject.behavior = EBehavior.STOP
-                }
-                subject.notifyObservers()
-            }
+
+            subject.notifyObservers()
+        }
+
+        // Opacité des blocks actifs/inactifs
+        for (block in blocks) {
+            if (activeBlocks.contains(block)) block.gameEntity.opacity = 1.0
+            else block.gameEntity.opacity = 0.5
         }
     }
 

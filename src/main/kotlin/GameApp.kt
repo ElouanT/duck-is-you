@@ -30,22 +30,7 @@ class GameApp : GameApplication() {
     }
 
     override fun initGame() {
-        getGameScene().setBackgroundColor(Color.rgb(20, 25, 30))
-        var map = currentLevel.map
-        var i = 0
-        // Placement des GameObject sur la map
-        for (obj in map.cases) {
-            var y = i/mapWidth
-            var x = i%mapWidth
-            if (obj != null) {
-                obj.gameEntity = FXGL.entityBuilder()
-                    .at(x * 48.0 * scaleFactor, y * 48.0 * scaleFactor)
-                    .view(obj.image)
-                    .scale(scaleFactor, scaleFactor)
-                    .buildAndAttach();
-            }
-            i++
-        }
+        loadLevel(currentLevel)
     }
 
     override fun initInput() {
@@ -78,15 +63,12 @@ class GameApp : GameApplication() {
             currentLevel.map.checkForBehaviorChange()
         }
         onKeyDown(KeyCode.R) {
-            reset()
+            currentLevel.reset()
         }
     }
 }
 
-fun reset(){
-    currentLevel.reset()
-}
-fun nextLevel(){
+fun unloadCurrentLevel() {
     var map = currentLevel.map
     // Retrait de toutes les entités du niveau actuel
     for (obj in map.cases) {
@@ -94,14 +76,16 @@ fun nextLevel(){
             obj.gameEntity.removeFromWorld()
         }
     }
+}
+
+fun loadLevel(level: Level) {
+    // Changement d'arrière plan
+    getGameScene().setBackgroundColor(Color.web(level.backgroundColor))
+
     var i = 0
 
-    // Passage au niveau suivant
-    levelIndex++
-    var nextLevel = buildLevel(levels.get(levelIndex))
-
     // Placement des nouveaux GameObject sur la map
-    for (obj in nextLevel.map.cases) {
+    for (obj in level.map.cases) {
         var y = i/mapWidth
         var x = i%mapWidth
         if (obj != null) {
@@ -115,16 +99,17 @@ fun nextLevel(){
     }
 
     // Reactualise
-    currentLevel = nextLevel
+    currentLevel = level
     currentLevel.reset()
 }
 
-fun buildLevel(levelBuilder: IBuilderLevel): Level {
-    levelBuilder.buildDuck()
-    levelBuilder.buildFlag()
-    levelBuilder.buildSprites()
-    levelBuilder.buildBlocks()
-    return levelBuilder.getLevel()
+fun nextLevel() {
+    unloadCurrentLevel()
+
+    // Passage au niveau suivant
+    if (levelIndex < levels.size) levelIndex++
+
+    loadLevel(levels.get(levelIndex).getLevel())
 }
 
 fun  main(args: Array<String>) {
@@ -133,7 +118,7 @@ fun  main(args: Array<String>) {
     levels.add(BuilderDemoLevel())
     levels.add(BuilderFinalLevel())
     // Construction du niveau
-    currentLevel = buildLevel(levels.get(levelIndex))
+    currentLevel = levels.get(levelIndex).getLevel()
 
     // Lancement du jeu
     launch(GameApp::class.java,args)
