@@ -19,7 +19,6 @@ class BlockFactory {
 
     fun createBlock(type: EBehavior): BlockAction {
         return when(type) {
-            EBehavior.PHANTOM -> BlockAction("block_phantom.png", type)
             EBehavior.STOP -> BlockAction("block_stop.png", type)
             EBehavior.MOVE -> BlockAction("block_you.png", type)
             EBehavior.PUSH -> BlockAction("block_push.png", type)

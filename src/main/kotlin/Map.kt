@@ -75,7 +75,6 @@ class Map(
                     return false
                 }
                 EBehavior.STOP -> return false
-                EBehavior.PHANTOM -> return true
             }
         }
 
