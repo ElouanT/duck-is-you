@@ -6,14 +6,15 @@ import com.almasb.fxgl.dsl.FXGL.Companion.onKeyDown
 import com.almasb.fxgl.dsl.getGameScene
 import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
+import java.nio.file.Files
+import java.nio.file.Paths
 import builder.*
-import enums.EBehavior
-import enums.EDirection
+import enums.*
 
-const val mapWidth : Int = 14
+const val mapWidth : Int = 15
 const val mapHeight : Int = 10
 var scaleFactor : Double = 1.0
-var levels : ArrayList<IBuilderLevel> = ArrayList()
+var levels : ArrayList<String> = ArrayList()
 lateinit var currentLevel : Level
 var levelIndex = 0
 
@@ -35,37 +36,29 @@ class GameApp : GameApplication() {
 
     override fun initInput() {
         onKeyDown(KeyCode.UP) {
-            var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE }
-            for (obj in movableObjects) {
-                currentLevel.map.move(obj!!, EDirection.UP)
-            }
-            currentLevel.map.checkForBehaviorChange()
+            move(EDirection.UP)
         }
         onKeyDown(KeyCode.DOWN) {
-            var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE }
-            for (obj in movableObjects) {
-                currentLevel.map.move(obj!!, EDirection.DOWN)
-            }
-            currentLevel.map.checkForBehaviorChange()
+            move(EDirection.DOWN)
         }
         onKeyDown(KeyCode.LEFT) {
-            var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE}
-            for (obj in movableObjects) {
-                currentLevel.map.move(obj!!, EDirection.LEFT)
-            }
-            currentLevel.map.checkForBehaviorChange()
+            move(EDirection.LEFT)
         }
         onKeyDown(KeyCode.RIGHT) {
-            var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE }
-            for (obj in movableObjects) {
-                currentLevel.map.move(obj!!, EDirection.RIGHT)
-            }
-            currentLevel.map.checkForBehaviorChange()
+            move(EDirection.RIGHT)
         }
         onKeyDown(KeyCode.R) {
             currentLevel.reset()
         }
     }
+}
+
+fun move(direction: EDirection) {
+    var movableObjects = currentLevel.map.cases.filter { obj -> obj != null && obj.behavior == EBehavior.MOVE }
+    for (obj in movableObjects) {
+        currentLevel.map.move(obj!!, direction)
+    }
+    currentLevel.map.checkForBehaviorChange()
 }
 
 fun unloadCurrentLevel() {
@@ -107,20 +100,32 @@ fun nextLevel() {
     unloadCurrentLevel()
 
     // Passage au niveau suivant
-    if (levelIndex < levels.size) levelIndex++
+    if (levelIndex < levels.size-1) levelIndex++
 
-    loadLevel(levels.get(levelIndex).getLevel())
+    loadLevel(LevelDirector(levels.get(levelIndex)).make())
+}
+
+fun getMapFilesPath(): ArrayList<String>
+{
+    var paths = ArrayList<String>()
+    val projectAbsolutePath = Paths.get("").toAbsolutePath().toString()
+    val resourcesPath = Paths.get(projectAbsolutePath, "/src/main/resources")
+    Files.walk(resourcesPath)
+        .filter { path -> Files.isRegularFile(path) }
+        .filter { path -> path.toString().endsWith(".duck") }
+        .forEach { path -> paths.add(path.toString()) }
+    return paths
 }
 
 fun  main(args: Array<String>) {
     // Initialisation
+
     // Ajout des niveaux
-    levels.add(BuilderDemoLevel())
-    levels.add(BuilderFinalLevel())
+    levels = getMapFilesPath()
+
     // Construction du niveau
-    currentLevel = levels.get(levelIndex).getLevel()
+    currentLevel = LevelDirector(levels.get(levelIndex)).make()
 
     // Lancement du jeu
     launch(GameApp::class.java,args)
 }
-

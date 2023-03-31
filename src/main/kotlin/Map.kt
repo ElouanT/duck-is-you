@@ -1,9 +1,6 @@
-import enums.EBehavior
-import enums.EBlock
-import enums.EDirection
-import enums.ESprite
-import observer.ConcretSubject
-import observer.Sprite
+import enums.*
+import factory.*
+import observer.*
 
 class Map(
     var width: Int = 0,
@@ -22,7 +19,7 @@ class Map(
         }
     }
 
-    fun setGameObject(obj: GameObject, x: Int, y: Int) {
+    fun setGameObject(obj: GameObject, i: Int) {
         // Ajout aux listes pour futur traitement
         if (obj is Sprite) {
             subjects.get(obj.type)!!.addObserver(obj) // Abonnement des sprites au listener associé à leur type
@@ -31,10 +28,8 @@ class Map(
         }
 
         // Emplacement sur la map
-        if (x<=width && y<=height) {
-            defaultCases[y*width + x] = obj
-            cases[y*width + x] = obj
-        }
+        defaultCases[i] = obj
+        cases[i] = obj
     }
 
     fun move(obj: GameObject, direction: EDirection) : Boolean {
@@ -80,6 +75,7 @@ class Map(
                     return false
                 }
                 EBehavior.STOP -> return false
+                EBehavior.PHANTOM -> return true
             }
         }
 
@@ -89,18 +85,10 @@ class Map(
 
         // Affichage
         when (direction) {
-            EDirection.UP -> {
-                obj.gameEntity.translateY(-48.0*scaleFactor)
-            }
-            EDirection.DOWN -> {
-                obj.gameEntity.translateY(48.0*scaleFactor)
-            }
-            EDirection.LEFT -> {
-                obj.gameEntity.translateX(-48.0*scaleFactor)
-            }
-            EDirection.RIGHT -> {
-                obj.gameEntity.translateX(48.0*scaleFactor)
-            }
+            EDirection.UP -> obj.gameEntity.translateY(-48.0*scaleFactor)
+            EDirection.DOWN -> obj.gameEntity.translateY(48.0*scaleFactor)
+            EDirection.LEFT -> obj.gameEntity.translateX(-48.0*scaleFactor)
+            EDirection.RIGHT -> obj.gameEntity.translateX(48.0*scaleFactor)
         }
         return true
     }
@@ -108,6 +96,8 @@ class Map(
     fun getAdjacentGameObject(gameObject: GameObject): ArrayList<GameObject> {
         var i = cases.indexOf(gameObject)
         var adjacentCases = ArrayList<GameObject>()
+        
+        if (i == -1) return adjacentCases
 
         if (i >= width && cases[i-width] != null) adjacentCases.add(cases[i-width]!!) // Haut
         if (i < width*(height-1) && cases[i+width] != null) adjacentCases.add(cases[i+width]!!) // Bas

@@ -1,3 +1,5 @@
+package factory
+
 import enums.ESprite
 
 class BlockSubject(image: String, type: ESprite): Block(image) {

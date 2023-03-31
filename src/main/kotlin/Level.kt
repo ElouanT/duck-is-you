@@ -1,5 +1,5 @@
-class Level(n: Int, backgroundColor: String, map: Map) {
-    var n : Int = n
+class Level(name: String, backgroundColor: String, map: Map) {
+    var name: String = name
     var backgroundColor: String = backgroundColor
     var map : Map = map
 

@@ -1,5 +1,5 @@
 package enums
 
 enum class EBehavior {
-    MOVE, PUSH, STOP, DEFEAT, WIN
+    MOVE, PUSH, STOP, DEFEAT, WIN, PHANTOM
 }
