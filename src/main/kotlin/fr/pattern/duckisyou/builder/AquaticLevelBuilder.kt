@@ -18,7 +18,7 @@ class AquaticLevelBuilder: ILevelBuilder {
         for (i in 0 until mapString.length) {
             when (mapString[i]) {
                 // Sprites
-                'd' -> map.setGameObject(Sprite(ESprite.DUCK, "sprite_duck.png"), i)
+                'd' -> map.setGameObject(Sprite(ESprite.DUCK, "sprite_duck_aquatic.png"), i)
                 'f' -> map.setGameObject(Sprite(ESprite.FLAG, "sprite_flag.png"), i)
                 'w' -> map.setGameObject(Sprite(ESprite.WALL, "sprite_wall_aquatic.png"), i)
                 'r' -> map.setGameObject(Sprite(ESprite.ROCK, "sprite_rock_aquatic.png"), i)
@@ -30,7 +30,7 @@ class AquaticLevelBuilder: ILevelBuilder {
                 'R' -> map.setGameObject(factory.createBlock(ESprite.ROCK), i)
                 'Y' -> map.setGameObject(factory.createBlock(EBehavior.MOVE), i)
                 'P' -> map.setGameObject(factory.createBlock(EBehavior.PUSH), i)
-                'L' -> map.setGameObject(factory.createBlock(EBehavior.DEFEAT), i)
+                'X' -> map.setGameObject(factory.createBlock(EBehavior.DEFEAT), i)
                 'V' -> map.setGameObject(factory.createBlock(EBehavior.WIN), i)
             }
         }

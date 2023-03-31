@@ -85,7 +85,6 @@ fun unloadCurrentLevel() {
 fun loadLevel(level: Level) {
     // Changement d'arrière plan
     getGameScene().setBackgroundColor(Color.web(level.backgroundColor))
-
     var i = 0
 
     // Placement des nouveaux fr.pattern.duckisyou.GameObject sur la map

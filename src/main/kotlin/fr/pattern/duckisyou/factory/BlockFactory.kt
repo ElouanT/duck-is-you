@@ -13,7 +13,7 @@ class BlockFactory {
             ESprite.FLAG -> BlockSubject("block_flag.png", type)
             ESprite.WALL -> BlockSubject("block_wall.png", type)
             ESprite.ROCK -> BlockSubject("block_rock.png", type)
-            ESprite.FIRE -> BlockSubject("block_fire.png", type)
+            ESprite.LAVA -> BlockSubject("block_lava.png", type)
         }
     }
 

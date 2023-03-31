@@ -23,17 +23,14 @@ class BaseLevelBuilder: ILevelBuilder {
                 'f' -> map.setGameObject(Sprite(ESprite.FLAG, "sprite_flag.png"), i)
                 'w' -> map.setGameObject(Sprite(ESprite.WALL, "sprite_wall_base.png"), i)
                 'r' -> map.setGameObject(Sprite(ESprite.ROCK, "sprite_rock_base.png"), i)
-                'h' -> map.setGameObject(Sprite(ESprite.FIRE, "sprite_fire.png"), i)
                 // Blocks
                 'I' -> map.setGameObject(factory.createBlock(), i)
                 'D' -> map.setGameObject(factory.createBlock(ESprite.DUCK), i)
                 'F' -> map.setGameObject(factory.createBlock(ESprite.FLAG), i)
                 'W' -> map.setGameObject(factory.createBlock(ESprite.WALL), i)
                 'R' -> map.setGameObject(factory.createBlock(ESprite.ROCK), i)
-                'H' -> map.setGameObject(factory.createBlock(ESprite.FIRE), i)
                 'Y' -> map.setGameObject(factory.createBlock(EBehavior.MOVE), i)
                 'P' -> map.setGameObject(factory.createBlock(EBehavior.PUSH), i)
-                'L' -> map.setGameObject(factory.createBlock(EBehavior.DEFEAT), i)
                 'V' -> map.setGameObject(factory.createBlock(EBehavior.WIN), i)
             }
         }

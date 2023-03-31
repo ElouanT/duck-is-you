@@ -20,6 +20,7 @@ class SpecialLevelBuilder: ILevelBuilder {
                 'd' -> map.setGameObject(Sprite(ESprite.DUCK, "sprite_duck.png", EBehavior.MOVE), i)
                 'f' -> map.setGameObject(Sprite(ESprite.FLAG, "sprite_flag.png", EBehavior.WIN), i)
                 'k' -> map.setGameObject(Sprite(ESprite.ROCK, "keys.png", EBehavior.STOP), i)
+                't' -> map.setGameObject(Sprite(ESprite.ROCK, "thanks.png", EBehavior.STOP), i)
             }
         }
     }
