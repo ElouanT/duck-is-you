@@ -22,6 +22,9 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.32")
     implementation("com.github.almasb:fxgl:17.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
 }
 
 tasks.test {
